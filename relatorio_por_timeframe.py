@@ -4,9 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from openpyxl import load_workbook
+from tqdm import tqdm
 from resources import OUTPUT_FOLDER, OUTPUT_REPORT, TIMEFRAMES, START_YEAR, END_YEAR
 
-# Mapeamento dos meses para exibição no gráfico
 MESES_PT = {
     1: "jan", 2: "fev", 3: "mar", 4: "abr", 5: "mai", 6: "jun",
     7: "jul", 8: "ago", 9: "set", 10: "out", 11: "nov", 12: "dez"
@@ -14,15 +14,14 @@ MESES_PT = {
 
 def gerar_relatorio_por_timeframe():
     os.makedirs(OUTPUT_REPORT, exist_ok=True)
+    arquivos = glob.glob(os.path.join(OUTPUT_FOLDER, "*.xlsx"))
 
-    # Para cada cripto (arquivo XLSX)
-    for file in glob.glob(os.path.join(OUTPUT_FOLDER, "*.xlsx")):
+    for file in tqdm(arquivos, desc="📈 Timeframe Report", unit="crypto"):
         cripto = os.path.basename(file).replace(".xlsx", "")
         wb = load_workbook(file)
 
         pdf_path = os.path.join(OUTPUT_REPORT, f"{cripto}_timeframe.pdf")
         with PdfPages(pdf_path) as pdf:
-            # Para cada timeframe
             for tf in TIMEFRAMES:
                 if tf not in wb.sheetnames:
                     continue
@@ -50,5 +49,3 @@ def gerar_relatorio_por_timeframe():
                     plt.tight_layout()
                     pdf.savefig()
                     plt.close()
-
-        print(f"📄 Relatório gerado: {pdf_path}")
