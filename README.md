@@ -1,6 +1,6 @@
 # 📊 rkd-backtest-report
 
-Automated generation of **PDF graphical reports** based on backtest results produced by the [`rkd-backtest-core`](https://github.com/your-username/rkd-backtest-core) project. This project focuses on visually consolidating the monthly returns of multiple cryptocurrencies across various timeframes.
+Automated generation of **PDF graphical reports** based on backtest results produced by the [`rkd-backtest-core`](https://github.com/madrijkaard/rkd-backtest-core) project. This project focuses on visually consolidating the monthly returns of multiple cryptocurrencies across various timeframes.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-yellow?logo=pandas)
