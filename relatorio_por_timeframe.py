@@ -7,43 +7,43 @@ from openpyxl import load_workbook
 from tqdm import tqdm
 from resources import OUTPUT_FOLDER, OUTPUT_REPORT, TIMEFRAMES, START_YEAR, END_YEAR
 
-MESES_PT = {
-    1: "jan", 2: "fev", 3: "mar", 4: "abr", 5: "mai", 6: "jun",
-    7: "jul", 8: "ago", 9: "set", 10: "out", 11: "nov", 12: "dez"
+MONTHS_EN = {
+    1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
+    7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
 }
 
-def gerar_relatorio_por_timeframe():
+def generate_timeframe_report_by_crypto():
     os.makedirs(OUTPUT_REPORT, exist_ok=True)
-    arquivos = glob.glob(os.path.join(OUTPUT_FOLDER, "*.xlsx"))
+    files = glob.glob(os.path.join(OUTPUT_FOLDER, "*.xlsx"))
 
-    for file in tqdm(arquivos, desc="📈 Timeframe Report", unit="crypto"):
-        cripto = os.path.basename(file).replace(".xlsx", "")
+    for file in tqdm(files, desc="📈 Timeframe Report", unit="crypto"):
+        crypto = os.path.basename(file).replace(".xlsx", "")
         wb = load_workbook(file)
 
-        pdf_path = os.path.join(OUTPUT_REPORT, f"{cripto}_timeframe.pdf")
+        pdf_path = os.path.join(OUTPUT_REPORT, f"{crypto}_timeframe.pdf")
         with PdfPages(pdf_path) as pdf:
             for tf in TIMEFRAMES:
                 if tf not in wb.sheetnames:
                     continue
 
                 df = pd.read_excel(file, sheet_name=tf)
-                df["Data"] = pd.to_datetime(df["Data"])
-                df["Ano"] = df["Data"].dt.year
-                df["Mês"] = df["Data"].dt.month.map(MESES_PT)
+                df["Date"] = pd.to_datetime(df["Date"])
+                df["Year"] = df["Date"].dt.year
+                df["Month"] = df["Date"].dt.month.map(MONTHS_EN)
 
-                for ano in range(START_YEAR, END_YEAR + 1):
-                    df_ano = df[df["Ano"] == ano]
-                    if df_ano.empty:
+                for year in range(START_YEAR, END_YEAR + 1):
+                    df_year = df[df["Year"] == year]
+                    if df_year.empty:
                         continue
 
-                    retorno_mes = df_ano.groupby("Mês")["Total Return [%]"].sum()
-                    retorno_mes = retorno_mes.reindex(MESES_PT.values())
+                    monthly_return = df_year.groupby("Month")["Total Return [%]"].sum()
+                    monthly_return = monthly_return.reindex(MONTHS_EN.values())
 
                     plt.figure(figsize=(10, 5))
-                    retorno_mes.plot(kind="bar", color="mediumseagreen", edgecolor="black")
-                    plt.title(f"{cripto} - {tf} - Retorno Mensal - {ano}")
-                    plt.ylabel("Retorno [%]")
-                    plt.xlabel("Mês")
+                    monthly_return.plot(kind="bar", color="mediumseagreen", edgecolor="black")
+                    plt.title(f"{crypto} - {tf} - Monthly Return - {year}")
+                    plt.ylabel("Return [%]")
+                    plt.xlabel("Month")
                     plt.axhline(0, color='black', linewidth=0.8)
                     plt.xticks(rotation=45)
                     plt.tight_layout()
