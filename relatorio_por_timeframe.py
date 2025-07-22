@@ -5,24 +5,29 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from openpyxl import load_workbook
 from tqdm import tqdm
-from resources import OUTPUT_FOLDER, OUTPUT_REPORT, TIMEFRAMES, START_YEAR, END_YEAR
 
 MONTHS_EN = {
     1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
     7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
 }
 
-def generate_timeframe_report_by_crypto():
-    os.makedirs(OUTPUT_REPORT, exist_ok=True)
-    files = glob.glob(os.path.join(OUTPUT_FOLDER, "*.xlsx"))
+def generate_timeframe_report_by_crypto(config):
+    output_folder = config["output_folder"]
+    output_report = config["output_report"]
+    timeframes = config["timeframes"]
+    start_year = config["start_year"]
+    end_year = config["end_year"]
+
+    os.makedirs(output_report, exist_ok=True)
+    files = glob.glob(os.path.join(output_folder, "*.xlsx"))
 
     for file in tqdm(files, desc="📈 Timeframe Report", unit="crypto"):
         crypto = os.path.basename(file).replace(".xlsx", "")
         wb = load_workbook(file)
 
-        pdf_path = os.path.join(OUTPUT_REPORT, f"{crypto}_timeframe.pdf")
+        pdf_path = os.path.join(output_report, f"{crypto}_timeframe.pdf")
         with PdfPages(pdf_path) as pdf:
-            for tf in TIMEFRAMES:
+            for tf in timeframes:
                 if tf not in wb.sheetnames:
                     continue
 
@@ -31,7 +36,7 @@ def generate_timeframe_report_by_crypto():
                 df["Year"] = df["Date"].dt.year
                 df["Month"] = df["Date"].dt.month.map(MONTHS_EN)
 
-                for year in range(START_YEAR, END_YEAR + 1):
+                for year in range(start_year, end_year + 1):
                     df_year = df[df["Year"] == year]
                     if df_year.empty:
                         continue
