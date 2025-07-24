@@ -51,6 +51,8 @@ def generate_detailed_reports_by_crypto(config):
                     table["Month"] = pd.Categorical(table["Month"],
                         categories=list(MONTHS_EN.values()), ordered=True)
                     table.sort_values(by="Month", inplace=True)
+
+                    # Formatação dos dados
                     table["Total Return [%]"] = table["Total Return [%]"].map(lambda x: f"{x:.2f}%")
                     table["Benchmark Return [%]"] = table["Benchmark Return [%]"].map(lambda x: f"{x:.2f}%")
                     table["Open Trade PnL"] = table["Open Trade PnL"].map(lambda x: f"{x:.2f}")
@@ -58,12 +60,44 @@ def generate_detailed_reports_by_crypto(config):
                     table["Total Closed Trades"] = table["Total Closed Trades"].astype(int)
                     table["Total Open Trades"] = table["Total Open Trades"].astype(int)
 
+                    # Linha de somatório
+                    sum_row = {
+                        "Month": "Total",
+                        "Total Return [%]": f"{df_year['Total Return [%]'].sum():.2f}%",
+                        "Benchmark Return [%]": f"{df_year['Benchmark Return [%]'].sum():.2f}%",
+                        "Total Trades": df_year["Total Trades"].sum(),
+                        "Total Closed Trades": df_year["Total Closed Trades"].sum(),
+                        "Total Open Trades": df_year["Total Open Trades"].sum(),
+                        "Open Trade PnL": f"{df_year['Open Trade PnL'].sum():.2f}"
+                    }
+                    table = pd.concat([table, pd.DataFrame([sum_row])], ignore_index=True)
+
+                    # Criação da tabela no PDF com formatação visual
                     fig, ax = plt.subplots(figsize=(10, 6))
                     ax.axis("off")
                     ax.axis("tight")
+
                     table_data = [table.columns.tolist()] + table.values.tolist()
                     table_plot = ax.table(cellText=table_data, colLabels=None, loc='center', cellLoc='center')
                     table_plot.scale(1.1, 1.3)
+
+                    # Cor e estilo para cabeçalho e linha "Total"
+                    header_color = '#D3D3D3'
+                    num_cols = len(table.columns)
+                    last_row_index = len(table_data) - 1
+
+                    # Cabeçalho
+                    for col in range(num_cols):
+                        cell = table_plot[0, col]
+                        cell.set_facecolor(header_color)
+                        cell.set_text_props(weight='bold')
+
+                    # Linha "Total"
+                    for col in range(num_cols):
+                        cell = table_plot[last_row_index, col]
+                        cell.set_facecolor(header_color)
+                        cell.set_text_props(weight='bold')
+
                     plt.title(f"{crypto} - {tf} - {year}", fontsize=14)
                     plt.tight_layout()
                     pdf.savefig()
