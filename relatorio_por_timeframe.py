@@ -19,13 +19,16 @@ def generate_timeframe_report_by_crypto(config):
     end_year = config["end_year"]
 
     os.makedirs(output_report, exist_ok=True)
-    files = glob.glob(os.path.join(output_folder, "*.xlsx"))
+
+    # ✅ SOMENTE arquivos *_strategy.xlsx
+    files = glob.glob(os.path.join(output_folder, "*_strategy.xlsx"))
 
     for file in tqdm(files, desc="📈 Timeframe Report", unit="crypto"):
-        crypto = os.path.basename(file).replace(".xlsx", "")
+        crypto = os.path.basename(file).replace("_strategy.xlsx", "")
         wb = load_workbook(file)
 
         pdf_path = os.path.join(output_report, f"{crypto}_timeframe.pdf")
+
         with PdfPages(pdf_path) as pdf:
             for tf in timeframes:
                 if tf not in wb.sheetnames:
@@ -33,7 +36,6 @@ def generate_timeframe_report_by_crypto(config):
 
                 df = pd.read_excel(file, sheet_name=tf)
 
-                # ✅ Usar a coluna 'Start' como referência de data
                 if "Start" not in df.columns:
                     print(f"⚠️ Sheet {tf} in {file} has no 'Start' column")
                     continue
@@ -47,15 +49,19 @@ def generate_timeframe_report_by_crypto(config):
                     if df_year.empty:
                         continue
 
-                    monthly_return = df_year.groupby("Month")["Total Return [%]"].sum()
-                    monthly_return = monthly_return.reindex(MONTHS_EN.values())
+                    monthly_return = (
+                        df_year
+                        .groupby("Month")["Total Return [%]"]
+                        .sum()
+                        .reindex(MONTHS_EN.values())
+                    )
 
                     plt.figure(figsize=(10, 5))
-                    monthly_return.plot(kind="bar", color="mediumseagreen", edgecolor="black")
+                    monthly_return.plot(kind="bar", edgecolor="black")
                     plt.title(f"{crypto} - {tf} - Monthly Return - {year}")
                     plt.ylabel("Return [%]")
                     plt.xlabel("Month")
-                    plt.axhline(0, color='black', linewidth=0.8)
+                    plt.axhline(0, linewidth=0.8)
                     plt.xticks(rotation=45)
                     plt.tight_layout()
                     pdf.savefig()
