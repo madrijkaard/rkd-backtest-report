@@ -32,7 +32,13 @@ def generate_timeframe_report_by_crypto(config):
                     continue
 
                 df = pd.read_excel(file, sheet_name=tf)
-                df["Date"] = pd.to_datetime(df["Date"])
+
+                # ✅ Usar a coluna 'Start' como referência de data
+                if "Start" not in df.columns:
+                    print(f"⚠️ Sheet {tf} in {file} has no 'Start' column")
+                    continue
+
+                df["Date"] = pd.to_datetime(df["Start"])
                 df["Year"] = df["Date"].dt.year
                 df["Month"] = df["Date"].dt.month.map(MONTHS_EN)
 

@@ -1,6 +1,9 @@
-output_folder: ../rkd-backtest-core/backtest
-output_report: report
+output_folder: ../rkd-backtest-core/output
+output_report: output
 timeframes:
   - 15m
-start_year: 2018
+  - 30m
+  - 1h
+  - 4h
+start_year: 2019
 end_year: 2025

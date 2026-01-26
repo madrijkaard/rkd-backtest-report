@@ -34,7 +34,13 @@ def generate_detailed_reports_by_crypto(config):
                         continue
 
                     df = pd.read_excel(file, sheet_name=tf)
-                    df["Date"] = pd.to_datetime(df["Date"])
+
+                    # ✅ Usar a coluna 'Start' como referência de data
+                    if "Start" not in df.columns:
+                        print(f"⚠️ Sheet {tf} in {file} has no 'Start' column")
+                        continue
+
+                    df["Date"] = pd.to_datetime(df["Start"])
                     df["Year"] = df["Date"].dt.year
                     df["Month"] = df["Date"].dt.month.map(MONTHS_EN)
                     df_year = df[df["Year"] == year]
@@ -86,14 +92,10 @@ def generate_detailed_reports_by_crypto(config):
                     num_cols = len(table.columns)
                     last_row_index = len(table_data) - 1
 
-                    # Cabeçalho
                     for col in range(num_cols):
                         cell = table_plot[0, col]
                         cell.set_facecolor(header_color)
                         cell.set_text_props(weight='bold')
-
-                    # Linha "Total"
-                    for col in range(num_cols):
                         cell = table_plot[last_row_index, col]
                         cell.set_facecolor(header_color)
                         cell.set_text_props(weight='bold')
